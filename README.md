@@ -94,3 +94,5 @@ secondary key in another table.
 - t combines two or more relations (tables) at a time.
 
 - They act as a cross-reference between the tables.
+
+<img src = "https://media.geeksforgeeks.org/wp-content/uploads/20230314174012/Different-types-of-keys.png">
