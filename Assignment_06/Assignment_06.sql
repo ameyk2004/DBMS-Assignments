@@ -7,14 +7,62 @@
 
 INSERT INTO Customer 
 VALUES 
-    ('Nikita', 7, 120000, 'Nashik'),
-    ('Aniket', 8, 120000, 'Mumbai')
+    ('Mayank', 9, 340000, 'Nashik'),
+    ('Purva', 10, 70000, 'Mumbai'),
+    ('Kshitij', 11, 82000, 'Mumbai'),
+    ('Gaurav', 12, 97000, 'Mumbai');
 
-SELECT c.cust_name, c.balance
-FROM
-Customer as c
-LEFT JOIN Borrower as b
-ON c.acc_no = b.acc_no
-WHERE b.loan_no IS NULL;
-;
+DELIMITER //
+
+CREATE PROCEDURE find_loan_eligibility()
+BEGIN
+    -- Variable declarations
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE customer_name VARCHAR(50);
+    DECLARE acc_balance FLOAT;
+    DECLARE cust_acc_num INT;
+    DECLARE cust_city VARCHAR(50);
+
+    -- Declare cursor for eligible customers
+    DECLARE loan_cursor CURSOR FOR
+        SELECT c.cust_name, c.acc_no, c.balance, c.city
+        FROM Customer AS c
+        LEFT JOIN Borrower AS b ON c.acc_no = b.acc_no
+        WHERE b.loan_no IS NULL;
+
+    -- Continue handler for cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Create loan_eligibility table if it doesn't exist
+    CREATE TABLE IF NOT EXISTS loan_eligibility(
+        cust_name VARCHAR(50),
+        acc_no INT,
+        balance FLOAT,
+        city VARCHAR(50),
+        UNIQUE KEY unique_customer (cust_name, acc_no) -- Ensuring unique entries
+    );
+
+    OPEN loan_cursor;
+
+    eligiblity_loop:
+    LOOP
+        -- Fetch data into variables
+        FETCH loan_cursor INTO customer_name, cust_acc_num, acc_balance, cust_city;
+
+        -- Check if done before proceeding to the next iteration
+        IF done THEN
+            LEAVE eligiblity_loop;
+        END IF;
+
+        IF acc_balance > 100000 THEN 
+            INSERT IGNORE INTO loan_eligibility (cust_name, acc_no, balance, city)
+            VALUES (customer_name, cust_acc_num, acc_balance, cust_city);
+        END IF;
+
+    END LOOP;
+
+    CLOSE loan_cursor;
+END //
+
+DELIMITER ;
 
