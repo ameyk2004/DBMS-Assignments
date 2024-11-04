@@ -1,182 +1,104 @@
-Assignment No 2B (Student Schema)
--- Consider the following relational Schema.
--- ● Student( s_id,Drive_id,T_id,s_name,CGPA,s_branch,S_dob)
--- ● PlacementDrive( Drive_id,Pcompany_name,package,location)
--- ● Training ( T_id,Tcompany_name,T_Fee,T_year)
+-- 4. PLSQL stored procedure:
 
--- Use the tables created in assignment no 2 and execute the following queries:
--- 1. Insert at least 10 records in the Student table and insert other tables accordingly.
--- 2. Display all students details with branch ‘Computer ‘and ‘It’ and student name
--- starting with 'a' or 'd'.
--- 3. list the number of different companies.(use of distinct)
--- 4. Give 15% increase in fee of the Training whose joining year is 2019.
--- 5. Delete Student details having CGPA score less than 7.
--- 6. Find the names of companies belonging to pune or Mumbai
--- 7. Find the student name who joined training in 1-1-2019 as well as in 1-1-2021
--- 8. Find the student name having maximum CGPA score and names of students
--- having CGPA score between 7 to 9 .
--- 9. Display all Student name with T_id with decreasing order of Fees
--- 10. Display PCompany name, S_name ,location and Package with Package 30K,
--- 40K and 50k
+-- Consider the following schema and write a stored procedure 
+-- to find those customers who have taken a loan. 
+-- Categorize these loan borrowers as critical, moderate and nominal based on their loan amount.
 
-CREATE TABLE PlacementDrive(
-    p_id INT PRIMARY KEY AUTO_INCREMENT,
-    p_company_name VARCHAR(50),
-    package INT,
-    location VARCHAR(50)
+-- Insert all the details of borrowers along with the category in borrower_category table. 
+-- Customer(Cust_name, AccNo, Balance, city)
+-- Loan(Loan_no, branch_name, Amount)
+-- Borrower(Cust_name, Loan_no)
+-- borrowr_category(Cust_name,AccNo,Loan_no,branch_name,amount,category)
+
+USE assn3_procedures;
+
+CREATE TABLE IF NOT EXISTS Customer(
+    cust_name VARCHAR(100),
+    acc_no INT PRIMARY KEY, 
+    balance FLOAT, 
+    city VARCHAR(50)
 );
 
-CREATE TABLE Training ( 
-    t_id INT PRIMARY KEY AUTO_INCREMENT,
-    t_company_name VARCHAR(50),
-    t_fee INT,
-    t_year YEAR
+CREATE TABLE IF NOT EXISTS Loan(
+    loan_no INT PRIMARY KEY,
+    branch_name VARCHAR(50),
+    amount FLOAT
 );
 
-CREATE TABLE Student(
-    s_id INT PRIMARY KEY,
-    p_id INT,
-    t_id INT,
-    s_name VARCHAR(50),
-    CGPA FLOAT,
-    s_branch VARCHAR(50),
-    s_dob DATE,
+CREATE TABLE IF NOT EXISTS Borrower(
+    acc_no INT PRIMARY KEY , 
+    loan_no INT NOT NULL, 
+    cust_name VARCHAR(50),
 
-    FOREIGN KEY (p_id) REFERENCES PlacementDrive(p_id),
-    FOREIGN KEY (t_id) REFERENCES Training(t_id)
+    FOREIGN KEY (acc_no) REFERENCES Customer(acc_no) ON DELETE CASCADE,
+    FOREIGN KEY (loan_no) REFERENCES Loan(loan_no) ON DELETE CASCADE
 );
 
--- QUERY 1
+CREATE TABLE IF NOT EXISTS borrower_category(
+    cust_name VARCHAR(50),
+    acc_no INT PRIMARY KEY,
+    loan_no INT,
+    branch_name VARCHAR(50),
+    amount FLOAT,
+    category VARCHAR(50),
 
-INSERT INTO PlacementDrive (p_company_name, package, location) 
-VALUES 
-    ("MaterCard", 40000, "Viman Nagar"),
-    ("Barclays", 65000, "Yerawda"),
-    ("BNY Mellon", 78000, "Shivaji Nagar"),
-    ("Deutsche Bank", 45000, "Hinjewadi"),
-    ("Zensar", 60000, "Kharadi"),
-    ("Dell", 80000, "Banglore"),
-    ("Adobe", 100000, "Banglore");
+    FOREIGN KEY (acc_no) REFERENCES Customer(acc_no) ON DELETE CASCADE,
+    FOREIGN KEY (loan_no) REFERENCES Loan(loan_no) ON DELETE CASCADE
+);
 
-INSERT INTO Training (t_company_name, t_fee, t_year) 
-VALUES 
-    ("MaterCard", 45000, 2020),
-    ("Barclays", 70000, 2021),
-    ("BNY Mellon", 75000, 2022),
-    ("Deutsche Bank", 50000, 2020),
-    ("Zensar", 65000, 2021),
-    ("Dell", 85000, 2022),
-    ("Adobe", 110000, 2023),
-    ("MaterCard", 55000, 2021),
-    ("Barclays", 72000, 2022);
-
-INSERT INTO Student (p_id, t_id, s_name, CGPA, s_branch, s_dob) 
-VALUES 
-    (1,2, "Amey Kulkarni", 9.7, "CSE", '2004-01-30');
-       
-SELECT CONSTRAINT_NAME
-FROM information_schema.KEY_COLUMN_USAGE
-WHERE 
-    table_name = "Student" AND
-    table_schema = "assn2_db";
-
-ALTER TABLE Student
-DROP FOREIGN KEY student_ibfk_1;
-
-INSERT INTO Student (s_id, p_id, t_id, s_name, CGPA, s_branch, s_dob) 
-VALUES 
-    (1, 1, 3, "Amey Kulkarni", 9.7, "CSE", '2004-01-30'),
-    (2, 2, 5, "Advait Joshi", 9.5, "CSE", '2004-02-15'),
-    (3, 3, 1, "Suvrat Ketkar", 8.8, "IT", '2004-03-05'),
-    (4, 4, 7, "Tirthraj Mahajan", 9.2, "ENTC", '2004-04-10'),
-    (5, 5, 4, "Vardhan Dongre", 8.6, "CSE", '2004-05-20'),
-    (6, 6, 9, "Anshul Kalbande", 9.1, "IT", '2004-06-25'),
-    (7, 7, 2, "Rinit Jain", 8.9, "ENTC", '2004-07-30'),
-    (8, 1, 6, "Hariom Gilda", 9.3, "CSE", '2004-08-18');
+SELECT * FROM Loan;
+SELECT * FROM Customer;
+SELECT * FROM Borrower;
 
 
--- QUERY 2
--- 2. Display all students details with branch ‘Computer ‘and ‘It’ and student name
--- starting with 'a' or 'd'.
+DROP PROCEDURE IF EXISTS categorize_borrowers;
 
-SELECT * 
-FROM Student
-WHERE 
-    (s_branch = "CSE" 
-    OR s_branch = "IT")
-    AND (s_name LIKE 'A%' OR s_name LIKE 'D%');
+DELIMITER //
 
--- QUERY 3
--- 3. list the number of different companies.(use of distinct)
+CREATE PROCEDURE categorize_borrowers()
+BEGIN
 
-SELECT distinct t_company_name
-FROM Training
-UNION
-SELECT distinct p_company_name
-FROM PlacementDrive;
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cust_name VARCHAR(50);
+    DECLARE acc_no INT;
+    DECLARE loan_no INT;
+    DECLARE branch_name VARCHAR(50);
+    DECLARE loan_amount FLOAT;
+    DECLARE category_borrower VARCHAR(50);
 
--- QUERY 4
--- 4. Give 15% increase in fee of the Training whose joining year is 2020.
+    DECLARE borrower_cursor CURSOR FOR
+        SELECT c.cust_name, b.acc_no, b.loan_no, l.branch_name, l.amount
+        FROM Customer as c
+        NATURAL JOIN Borrower as b
+        NATURAL JOIN Loan as l;
 
-SELECT *
-FROM Training
-WHERE
-    t_year = 2020;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-UPDATE Training
-SET t_fee = 1.15 * t_fee
-WHERE t_year = 2020;
+    OPEN borrower_cursor;
 
-SELECT *
-FROM Training
-WHERE
-    t_year = 2020;
+    category_loop: LOOP
+        FETCH borrower_cursor INTO cust_name, acc_no, loan_no, branch_name, loan_amount;
 
--- QUERY 5
--- 5. Delete Student details having CGPA score less than 7.
+        IF done THEN
+            LEAVE category_loop;
+        END IF;
 
-DELETE 
-FROM Student
-WHERE CGPA < 7;
-
--- QUERY 6
--- 6. Find the names of companies belonging to pune or Mumbai
-SELECT p_company_name 
-FROM PlacementDrive 
-WHERE 
-    location = "Pune" 
-    OR location = "Mumbai";
-
--- QUERY 7
--- 7. Find the student name who joined training in 1-1-2019 as well as in 1-1-2021
+        IF loan_amount < 60000 THEN SET category_borrower = "Low";
+        ELSEIF loan_amount >= 60000 AND loan_amount <= 80000 THEN SET category_borrower = "Moderate";
+        ELSE SET category_borrower = "Critical";
+        END IF;
 
 
-SELECT s.s_name
-FROM Student s
-JOIN Training t ON s.t_id = t.t_id
-WHERE t.t_year IN (2019, 2021);
+       INSERT INTO borrower_category (cust_name, acc_no, loan_no, branch_name, amount, category) 
+        VALUES (cust_name, acc_no, loan_no, branch_name, loan_amount, category_borrower);
+    END LOOP;
 
--- QUERY 8
--- 8. Find the student name having maximum CGPA score and names of students having CGPA score between 7 to 9 .
+    -- Close the cursor
+    CLOSE borrower_cursor;  
 
-SELECT s_name, CGPA FROM Student
-where CGPA = (SELECT MAX(CGPA) FROM Student)
-UNION
-SELECT s_name, CGPA FROM Student
-WHERE CGPA >= 7 AND CGPA <=9;
+END //
 
+DELIMITER ;
 
--- QUERY 9
--- 9. Display all Student name with T_id with decreasing order of Fees
-
-SELECT s.s_name, t.t_fee 
-FROM Student as s
-Join Training as t
-ON t.t_id = s.t_id
-order by t.t_fee DESC;
-
-
--- QUERY 10
--- 10. Display PCompany name, S_name ,location and Package with Package 30K, 40K and 50k
-
-
+call categorize_borrowers();
+SELECT * FROM borrower_category;

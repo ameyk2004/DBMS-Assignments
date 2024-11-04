@@ -99,7 +99,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
-call categorize_borrowers();
-SELECT * FROM borrower_category;
-
