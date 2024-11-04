@@ -100,4 +100,6 @@ END //
 
 DELIMITER ;
 
-select * from borrower_category;
+call categorize_borrowers();
+SELECT * FROM borrower_category;
+
