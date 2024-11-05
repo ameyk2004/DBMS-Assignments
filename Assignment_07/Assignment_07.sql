@@ -114,10 +114,9 @@ BEGIN
     WHERE emp_id = NEW.emp_id;
 
     DELETE FROM Company_Info;
+    
 
-    INSERT INTO Company_Info (Emp_Count, Salary_Expenses)  -- Ensure to specify columns
-    SELECT COUNT(emp_id), SUM(salary)
-    FROM Employee;
+
 
 END //
 
