@@ -1,117 +1,123 @@
 package Assignment_08;
 
-/*
-	Step 1: Goto https://dev.mysql.com/downloads/connector/j/
-	Step 2: Select Platform Independent OS and download ZIP file and extract it
-	Step 3: Create new Java Project in Eclipse
-	Step 4: Project -> Properties -> Java Build Path -> Libraries -> Add External Jar -> Select mysql-connector-j-9.1.0.jar -> Apply -> Apply and Close
-	
-	-- x -- x -- x
-	Step 1: Class.forName('com.mysql.cj.jdbc.Driver')
-	Step 2: Connection conn = DriverManager.getConnection(url, username, password)
-	Step 3: PreparedStatement stmt = conn.PreparedStatement(query);
-	...
-	Step 4: stmt.execute() or stmt.executeQuery() or stmt.executeUpdate()
-	
-*/
-
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Main {
-	public static void displayUsers(Connection conn) {
-		try{
-		
-			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users");
-			ResultSet rs = stmt.executeQuery();
-			
-			while(rs.next()) {
-				int id = rs.getInt(1);
-				String user = rs.getString(2);
-				System.out.println("id: " + Integer.toString(id) + " user: " + user);
-			}
-			
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
 
-		
-	}
-	
-	public static void insertIntoUsersTable(Connection conn) {
-		String[] users = {"Tirthraj", "Mulay", "Vartak", "Nags", "Chotu Badmash"};
-		
-		try {
-			String insertQuery = "INSERT INTO users (user) VALUES (?)";
-			PreparedStatement stmt = conn.prepareStatement(insertQuery);
-			for (int i=0; i<users.length; i++) {
-				stmt.setString(1, users[i]);
-				stmt.executeUpdate();
-			}
-			
-			System.out.println("Users Inserted into the table");
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
-		
-	}
-	
-	public static void createUsersTable(Connection conn) {
-		try {
-			String createTableQuery = "CREATE TABLE users ("
-									+ "id INT PRIMARY KEY AUTO_INCREMENT,"
-									+ "user VARCHAR(50) NOT NULL"
-									+ ")";
-			Statement stmt = conn.createStatement();
-			stmt.executeUpdate(createTableQuery);
-			System.out.println("Table 'users' created successfully.");
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-	
-	public static void updateUserInfo(Connection conn) {
-		try {
-			String updateQuery = "UPDATE users "
-								+ "SET user = ?"
-								+ "WHERE id = ?";
-			PreparedStatement stmt = conn.prepareStatement(updateQuery);
-			stmt.setString(1, "Tirthraj Mahajan");
-			stmt.setInt(2, 1);
-			stmt.executeUpdate();
-			System.out.println("Row Updated Successfully");
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
-		
-	}
-	
-	public static void main(String[] args) throws Exception {
-		
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			System.out.println("JDBC Driver Loaded");
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-			return;
-		}
-		
-		String connection_url = "jdbc:mysql://localhost:3306/07_jdbc_connectivity";
-		String username = "root";
-		String password = "Amey1234";
-		Connection conn = DriverManager.getConnection(connection_url,username, password);
-		
-		createUsersTable(conn);
-		insertIntoUsersTable(conn);
-		displayUsers(conn);
-		updateUserInfo(conn);
-		displayUsers(conn);
+    public static void createUsersTable(Connection conn) {
+        try {
+            Statement st = conn.createStatement();
+            String query = "CREATE TABLE IF NOT EXISTS User("
+                           + "id INT PRIMARY KEY AUTO_INCREMENT, "
+                           + "name VARCHAR(50), "
+                           + "salary INT)";
+            st.executeUpdate(query);
+            System.out.println("Table created successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-		conn.close();
-		
-	}
+    public static void addUsers(Connection conn, ArrayList<User> users) {
+        try {
+            PreparedStatement st = conn.prepareStatement("INSERT INTO User (name, salary) VALUES (?, ?);");
+            for (User user : users) {
+                st.setString(1, user.name);
+                st.setInt(2, user.salary);
+                st.executeUpdate();
+                System.out.println("User: " + user.name + " added successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void displayUsers(Connection conn) {
+        try {
+            Statement st = conn.createStatement();
+            String query = "SELECT * FROM User";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                int salary = rs.getInt("salary");
+                System.out.println("\n-----------------------------");
+                System.out.println("ID: " + id);
+                System.out.println("Name: " + name);
+                System.out.println("Salary: " + salary);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String args[]) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Assignment 08");
+        System.out.println("MySQL Database Connectivity using JDBC");
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            System.out.println("\nDriver Loaded Successfully");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String url = "jdbc:mysql://localhost:3306/jdbc_connectivity";
+
+        try (Connection conn = DriverManager.getConnection(url, "root", "Amey1234")) {
+            System.out.println("\nConnected to Database Successfully");
+
+            while (true) {
+                System.out.println("\n--- Menu ---");
+                System.out.println("1. Create Users Table");
+                System.out.println("2. Add Users");
+                System.out.println("3. Display Users");
+                System.out.println("4. Exit");
+                System.out.print("Enter your choice: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+
+                switch (choice) {
+                    case 1:
+                        createUsersTable(conn);
+                        break;
+
+                    case 2:
+                        ArrayList<User> users = new ArrayList<>();
+                        System.out.print("Enter number of users to add: ");
+                        int numUsers = scanner.nextInt();
+                        scanner.nextLine();
+                        for (int i = 0; i < numUsers; i++) {
+                            System.out.print("Enter name for user " + (i + 1) + ": ");
+                            String name = scanner.nextLine();
+                            System.out.print("Enter salary for user " + (i + 1) + ": ");
+                            int salary = scanner.nextInt();
+                            scanner.nextLine();
+                            users.add(new User(name, salary));
+                        }
+                        addUsers(conn, users);
+                        break;
+
+                    case 3:
+                        displayUsers(conn);
+                        break;
+
+                    case 4:
+                        System.out.println("Exiting...");
+                        scanner.close();
+                        return;
+
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+		scanner.close();
+    }
 }
