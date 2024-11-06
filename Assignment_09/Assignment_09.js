@@ -57,15 +57,7 @@ db.teacher.insertMany([
 // INSERTIONS
 
 
-
 // QUERIES
-
-/*
-9. Use update() method to change the designation of teachers whose experience is 10 yearsor above to Professor
-10. Use save() method to change the designation of teachers to Professor.
-11. Delete the documents from teachers collection having appointment_natureas “adhoc”.
-12. Display with pretty() method, the first 3 documents in teachers collection in ascending orderof experience
-*/
 
 // Find the information about all teachers
 db.teacher.find()
