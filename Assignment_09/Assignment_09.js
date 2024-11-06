@@ -61,8 +61,7 @@ db.teacher.insertMany([
 // QUERIES
 
 /*
-8. Use save() method to insert one entry in teachers collection
-9. Useupdate() method to change the designation of teachers whose experience is 10 yearsor above to Professor
+9. Use update() method to change the designation of teachers whose experience is 10 yearsor above to Professor
 10. Use save() method to change the designation of teachers to Professor.
 11. Delete the documents from teachers collection having appointment_natureas “adhoc”.
 12. Display with pretty() method, the first 3 documents in teachers collection in ascending orderof experience
@@ -100,4 +99,14 @@ db.teacher.updateOne(
     {upsert : true}
 )
 
-// Find the teachers‟ name and experience & arrange in decreasing order of experience
+// Find the teachers name and experience & arrange in decreasing order of experience
+
+db.teacher.find({}, {name:1, experience: 1, _id:0}).sort({"experience.industry" : -1})
+
+// Use save() method to insert one entry in teachers collection
+
+db.teacher.save({
+    _id: ObjectId(),
+    name: "Advait Joshi"
+})
+
