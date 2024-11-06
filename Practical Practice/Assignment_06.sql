@@ -100,7 +100,7 @@ BEGIN
         END IF;
 
         INSERT INTO loan_eligibility
-        VALUES (cust_acc_no, customer_name, cust_balance, eligibility)
+        VALUES (cust_acc_no, customer_name, cust_balance, eligibility);
 
     END LOOP;
 

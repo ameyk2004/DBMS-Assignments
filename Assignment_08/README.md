@@ -1,6 +1,5 @@
 # JDBC Connection and SQL Execution in Java
 
-
 ## Prerequisites
 
 Ensure you have:
