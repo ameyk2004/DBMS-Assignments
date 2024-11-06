@@ -13,6 +13,17 @@
 //     "customer":"Amey"
 //  }
 
+
+db.orders.createIndex({ "product": 1 });
+db.orders.createIndex({ "customer": 1 });
+db.orders.createIndex({ "product": 1, "customer": 1 });
+db.orders.createIndex({ "price": 1 });
+
+
+db.orders.getIndexes();
+
+
+
 db.createCollection("orders");
 
 db.orders.insertMany([
