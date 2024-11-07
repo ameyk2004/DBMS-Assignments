@@ -99,6 +99,33 @@ db.users.aggregate([
 
 //Find average number of Tags per User
 
+db.users.aggregate(
+    [
+        {"$unwind" : "$tags"},
+        {
+            "$group": {
+                _id: "$name",
+                no_of_tags: {
+                    "$sum" : 1
+                }
+            }
+        },
+        {
+            "$group": {
+                _id: null,
+                averagetag: {
+                    "$avg" : "no_of_tags"
+                }
+            }
+        }
+    ]
+)
+
+
+
+
+
+
 db.users.aggregate([
     {
         '$unwind': '$tags'

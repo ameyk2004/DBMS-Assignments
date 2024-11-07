@@ -137,3 +137,27 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+db.users.find({
+    "favoriteFruit" :
+        {"$eq" : "apple"},
+    "$and": [
+        {"eyecolor" : {"$eq" : "green"}},
+    ]
+});
+
+db.users.find({
+    "favoriteFruit": { "$eq": "apple" },
+    and: [
+        { "eyecolor": { "$eq": "green" } },
+        { "gender": { "$eq": "female" } }
+    ]
+});
+
+
+db.Sample.deleteOne(
+    {},
+    {$set: {"name": "Raji"}},
+    {upsert: true}
+)

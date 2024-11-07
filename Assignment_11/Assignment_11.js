@@ -188,3 +188,21 @@ db.classes.mapReduce(
     out: "results"
   }
 )
+
+
+var map_function = function(){
+  emit(this.professor, 1);
+};
+
+var reduce_function = function(Class, Count){
+  return Array.sum(Count);
+};
+
+db.classes.mapReduce(
+  map_function,
+  reduce_function,
+  {
+    query: {professor : "Alice Jones"},
+    out: "results"
+  }
+)
